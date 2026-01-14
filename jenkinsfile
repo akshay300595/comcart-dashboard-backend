@@ -1,0 +1,40 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Checkout') {
+            steps {
+                // Ye command parameter se branch uthayegi
+                checkout scm
+            }
+        }
+
+        stage('Install Dependencies') {
+            steps {
+                // CI command dependencies install karne ke liye best hai
+                sh 'npm install'
+            }
+        }
+
+        stage('Build Project') {
+            steps {
+                // NestJS ya Node project ko build (dist folder) karne ke liye
+                sh 'npm run build'
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                // PM2 se server start/restart karna
+                // Isme hum 'comcart-backend' naam de rahe hain taaki pehchaan sakein
+                sh "pm2 restart comcart-backend || pm2 start dist/main.js --name comcart-backend"
+            }
+        }
+    }
+
+    post {
+        always {
+            echo 'Pipeline process finished.'
+        }
+    }
+}
