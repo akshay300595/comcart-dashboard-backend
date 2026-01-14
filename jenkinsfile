@@ -1,40 +1,30 @@
 pipeline {
     agent any
 
-    stages {
-        stage('Checkout') {
-            steps {
-                // Ye command parameter se branch uthayegi
-                checkout scm
-            }
-        }
-
-        stage('Install Dependencies') {
-            steps {
-                // CI command dependencies install karne ke liye best hai
-                sh 'npm install'
-            }
-        }
-
-        stage('Build Project') {
-            steps {
-                // NestJS ya Node project ko build (dist folder) karne ke liye
-                sh 'npm run build'
-            }
-        }
-
-        stage('Deploy') {
-            steps {
-                // PM2 se server start/restart karna
-                // Isme hum 'comcart-backend' naam de rahe hain taaki pehchaan sakein
-                sh "pm2 restart comcart-backend || pm2 start dist/main.js --name comcart-backend"
-            }
-        }
+    // Iske bina "Build with Parameters" ka option nahi dikhega
+    parameters {
+        string(name: 'BRANCH_NAME', defaultValue: 'master', description: 'Add branch name to deploy comcart dashboard backend code?')
     }
 
-    post {
-        always {
-            echo 'Pipeline process finished.'
+    stages {
+        stage('Checkout Code') {
+            steps {
+                // Ye line tumhari di hui branch ko hi pull karegi
+                git branch: "${params.BRANCH_NAME}", 
+                    url: 'https://github.com/akshay300595/comcart-dashboard-backend.git'
+            }
+        }
+
+        stage('Deploying File') {
+            steps {
+                echo "Deploying branch: ${params.BRANCH_NAME}"
+                
+                // Folder banao aur file copy karo
+                sh 'mkdir -p /tmp/my-test-web'
+                sh 'cp index.html /tmp/my-test-web/'
+                
+                echo "Success! File /tmp/my-test-web/index.html par bhej di gayi hai."
+            }
         }
     }
 }
